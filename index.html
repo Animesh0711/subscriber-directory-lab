@@ -1,0 +1,253 @@
+<!doctype html>
+<!-- Local interface. Author: OpenAI Codex for Animesh Pattnaik. -->
+<html lang="en"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Subscriber Directory Lab</title>
+<style>
+:root{font-family:Segoe UI,Arial,sans-serif;color:#172b40;background:#f2f5f8}
+*{box-sizing:border-box}body{margin:0}header{background:#12283b;color:white;
+padding:26px 36px}header small{color:#b7ccdc;letter-spacing:2px}
+h1{margin:8px 0;
+font-size:29px}header p{margin:0;color:#ccdce7}main{max-width:1240px;
+margin:auto;
+padding:24px}nav{display:flex;gap:8px;margin-bottom:22px}button{cursor:pointer;
+border:1px solid #c9d7e2;background:white;color:#18364a;padding:11px 17px;
+border-radius:6px;font-weight:600}button.active,.primary{background:#087e8b;
+color:white;border-color:#087e8b}button:disabled{opacity:.5;cursor:wait}
+section{display:none}section.active{display:block}.grid{display:grid;
+grid-template-columns:1fr 1fr;gap:20px}.card{background:white;padding:24px;
+border:1px solid #dbe4eb;border-radius:9px;margin-bottom:18px}h2{margin:0 0 
+16px;
+font-size:21px}h3{font-size:16px;margin:0 0 12px}.hint{font-size:13px;
+color:#526779;
+line-height:1.6}label{display:block;font-size:13px;font-weight:600;
+margin:14px 0 6px}
+input,select{width:100%;padding:11px;border:1px solid #bdcbd6;
+border-radius:5px;
+background:white;color:#172b40}input[type=file]{padding:8px}.row{display:flex;
+gap:12px;align-items:end}.row>*{flex:1}.actions{margin-top:18px;display:flex;
+gap:9px}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;
+padding:11px 10px;border-bottom:1px solid #e3eaf0}th{color:#53687a;
+background:#f6f8fa}
+.stat{font-size:31px;font-weight:700;color:#087e8b}.stats{display:flex;
+gap:32px;
+margin:12px 0 22px}.stats span{display:block;font-size:12px;color:#5d7181}
+pre{font:13px/1.7 Consolas,monospace;white-space:pre-wrap;
+overflow-wrap:anywhere;
+background:#f6f8fa;padding:14px;border-radius:5px}#notice{margin:0 0 18px;
+padding:13px 17px;border-radius:5px;background:#e0f2ed;color:#185846}
+#notice.error{background:#fde8e7;color:#942c28}.hidden{display:none!important}
+.scroll{max-height:360px;overflow:auto}.bar{height:13px;background:#087e8b;
+border-radius:3px}.barrow{display:grid;grid-template-columns:135px 1fr 90px;
+gap:12px;align-items:center;margin:13px 0;font-size:13px}footer{color:#5d7181;
+font-size:12px;padding:12px 0}.pill{font-size:11px;background:#e7f3f3;
+padding:5px 8px;border-radius:20px;color:#087e8b}
+@media(max-width:800px){.grid{grid-template-columns:1fr}nav{flex-wrap:wrap}}
+</style>
+<header><small>DSA / INTERNAL ASSESSMENT II</small>
+<h1>Subscriber Directory Lab</h1>
+<p>Skip list · Chained hash table · Binary search</p></header>
+<main><p class="hint">No installation needed. Records stay in this tab. Reloading clears them. Export to keep your work. Only use synthetic data for this demonstration.</p><nav aria-label="Project screens">
+<button class="active" data-tab="setup">01 Dataset</button>
+<button data-tab="search">02 Search &amp; update</button>
+<button data-tab="structures">03 Inside the indexes</button>
+<button data-tab="bench">04 Benchmark</button></nav>
+<div id="notice" role="status">Loading the browser engine…</div>
+<section id="setup" class="active"><div class="grid"><div class="card">
+<h2>Build the same directory three ways</h2>
+<p class="hint">Synthetic records only. Seed 8 makes the dataset 
+reproducible.</p>
+<label for="count">Number of subscribers</label><input id="count" 
+value="50000">
+<div class="row"><div><label for="buckets">Hash buckets</label>
+<input id="buckets" value="62501"></div><div>
+<label for="probability">Skip list promotion probability</label>
+<input id="probability" value="0.5"></div></div>
+<div class="actions"><button class="primary" id="generate">Generate &amp; 
+build</button></div>
+<label for="file">Or import a subscriber CSV</label><input id="file" 
+type="file" accept=".csv">
+<p class="hint">Invalid rows are reported. Valid rows are loaded; duplicate 
+IDs are rejected.</p>
+</div><div class="card"><h2>Current directory</h2><div class="stats">
+<div><div class="stat" id="record-count">0</div><span>records loaded</span>
+</div>
+<div><div class="stat" id="load-factor">—</div><span>hash load factor</span>
+</div></div>
+<div id="build-result"><p class="hint">Build timings and counters will 
+appear here.</p></div>
+<p class="hint">Build time includes insertion or manual merge sorting.
+Query time is measured separately.</p><pre id="import-result">No rejected 
+rows.</pre></div></div></section>
+<section id="search"><div class="grid"><div class="card"><h2>Ask the 
+directory</h2>
+<label for="kind">Search mode</label><select id="kind">
+<option value="exact">Exact subscriber ID</option><option value="range">
+Inclusive ID range</option>
+<option value="recursive">Exact ID / recursive binary search</option></select>
+<div class="row"><div><label for="low">Subscriber ID / range start</label>
+<input id="low" value="123456"></div><div><label for="high">Range end</label>
+<input id="high" value="123476"></div></div>
+<div class="actions"><button class="primary" id="query">Run search</button>
+</div>
+<p class="hint">Range results are ordered by subscriber ID for all three 
+methods.
+The table previews up to 100 matches.</p></div>
+<div class="card"><h2>Change a record</h2><label for="change-key">Subscriber 
+ID</label>
+<input id="change-key" value="200002"><div class="actions">
+<button id="insert">Insert synthetic record</button><button id="delete">
+Delete ID</button></div>
+<p class="hint">Each action updates all three indexes. Export before closing or refreshing this page. Changes stay in this browser tab.</p>
+<button id="export">Export CSV &amp; index snapshot</button><div 
+id="mutation"></div></div></div>
+<div class="card"><h2>Query measurements <span class="pill">Actual run</span>
+</h2>
+<p class="hint">A time of 0 means the search was faster than the browser timer can resolve. Use the repeated benchmark for timing comparisons.</p><div id="query-result">Run a query to see its counters.</div></div>
+<div class="card"><h2>Matching subscriber records</h2><div class="scroll" 
+id="records"></div></div></section>
+<section id="structures"><div class="card"><h2>Skip list express lanes</h2>
+<p class="hint">First 12 keys on each level. Counts cover the full index.</p>
+<pre id="levels">Build indexes first.</pre></div><div class="grid"><div 
+class="card">
+<h2>Hash table chains</h2><pre id="chains"></pre></div><div class="card">
+<h2>Sorted array</h2><p class="hint">First 24 IDs after manual merge sort.</p>
+<pre id="array"></pre><p class="hint">Binary search repeatedly halves this 
+ordered array.</p>
+<h3>Last build counters</h3><div id="structure-metrics"></div></div></div>
+</section>
+<section id="bench"><div class="card"><div class="row"><div><h2>Compare search cost</h2>
+<p class="hint">1,000 / 10,000 / 50,000 records · 5 repetitions · 100 exact 
+and 12 range queries.
+Timers include counters. File loading and index building are excluded. These are new measurements on your device; they differ from the desktop report.</p>
+</div>
+<button class="primary" id="benchmark">Run full benchmark</button></div>
+<p class="hint">Exact queries: 80% present, 20% absent. Each range returns 
+100 records.
+The linear baseline scans the original shuffled data.</p></div>
+<div class="grid"><div class="card"><h2>Exact lookup at 50,000</h2><div 
+id="exact-bars"></div></div>
+<div class="card"><h2>Range lookup at 50,000</h2><div id="range-bars"></div>
+</div></div>
+<div class="card"><h2>Measured results</h2><button id="download-benchmark" class="hidden">Download benchmark results</button><div id="benchmark-result">No browser benchmark yet. Click Run full benchmark. This can take several minutes.</div>
+</div></section>
+<footer>Animesh Pattnaik | Browser edition · Python algorithms via Pyodide</footer></main>
+<script>
+const $=id=>document.getElementById(id);
+const esc=x=>String(x).replaceAll('&','&amp;').replaceAll('<','&lt;')
+ .replaceAll('>','&gt;').replaceAll('"','&quot;');
+function notice(text,error=false){$('notice').textContent=text;
+ $('notice').className=error?'error':'';window.scrollTo(0,0)}
+function table(rows,cols){return  '<table><thead><tr>'+cols.map(c=>'<th>'+esc(c[1])+ '</th>').join('')+
+ '</tr></thead><tbody>'+rows.map(r=>'<tr>'+cols.map(c=>'<td>'+esc(typeof
+ r[c[0]]==='number'?
+ (Number.isInteger(r[c[0]])?r[c[0]]:r[c[0]].toFixed(3)):r[c[0]])+
+ '</td>').join('')+'</tr>').join('')+'</tbody></table>'}
+const metricCols=[['method','Method'],['time_us','Time (µs)'],
+ ['comparisons','Comparisons'],['visits','Visits'],['writes','Writes']];
+const worker = new Worker('./worker.js');
+let sequence=0;
+const pending=new Map();
+worker.onmessage=({data})=>{
+ const call=pending.get(data.id);if(!call)return;
+ pending.delete(data.id);data.error?call.reject(Error(data.error)):call.resolve(data.result);
+};
+worker.onerror=()=>{for(const p of pending.values())p.reject(Error('The browser engine could not start. Check your internet connection and reload.'));pending.clear();};
+function api(path,data){return new Promise((resolve,reject)=>{
+ const id=++sequence;pending.set(id,{resolve,reject});worker.postMessage({id,path,data});
+});}
+function downloadFile(name,content,type='application/json'){
+ const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));
+ a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+async function task(fn){
+ document.querySelectorAll('button').forEach(b=>b.disabled=true);
+ try{await fn()}catch(e){notice(e.message,true)}finally{
+ document.querySelectorAll('button').forEach(b=>b.disabled=false)}}
+async function refresh(){const s=await api('status');
+ $('record-count').textContent=s.count.toLocaleString();
+ if(!s.built)return;$('load-factor').textContent=s.hash.load_factor.toFixed(3);
+ $('build-result').innerHTML=table(s.build,metricCols);
+ $('structure-metrics').innerHTML=table(s.build,
+ metricCols.filter(c=>c[0]!=='time_us'));
+ $('levels').textContent=s.skip.levels.map(l=>'L'+
+ String(l.level).padStart(2)+'  '+
+ String(l.count).padStart(6)+' nodes | '+l.keys.join(' → ')).join('\n');
+ $('chains').textContent='Buckets: '+s.hash.capacity+' | Occupied: '+
+ s.hash.occupied+
+ '\nLoad factor: '+s.hash.load_factor.toFixed(3)+' | Longest chain: '+
+ s.hash.max_chain+
+ '\n\n'+s.hash.chains.map(c=>'B'+c.bucket+' ['+c.length+'] '+
+ c.keys.join(' → ')).join('\n');
+ $('array').textContent=s.array.join(' → ')}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('section,nav button').forEach(
+ x=>x.classList.remove('active'));
+ b.classList.add('active');$(b.dataset.tab).classList.add('active')});
+function config(){const n=Number($('count').value),
+ capacity=Number($('buckets').value),
+ probability=Number($('probability').value);
+ if(!Number.isInteger(n)||n<0||n>1000000)
+ throw Error('Record count must be 0..1000000.');
+ if(!Number.isInteger(capacity)||capacity<1||capacity>2000000)
+ throw Error('Buckets must be 1..2000000.');
+ if(!Number.isFinite(probability)||probability<0||probability>=1)
+ throw Error('Probability must be at least 0 and less than 1.');
+ return {n,capacity,probability}}
+async function load(text){const r=await api('load',{...config(),
+ ...(text===undefined?{}:{text})});
+ await refresh();$('import-result').textContent=r.rejected.length?
+ JSON.stringify(r.rejected,null,2):'No rejected rows.';
+ notice('Built all three indexes. '+r.count.toLocaleString()+
+ ' valid records; '+r.rejected.length+' rejected rows.')}
+$('generate').onclick=()=>task(()=>load());
+ $('file').onchange=()=>task(async()=>{
+ if($('file').files[0])await load(await $('file').files[0].text())});
+function key(id){const value=$(id).value.trim();
+ if(!/^\d+$/.test(value)||Number(value)>2147483647)
+ throw Error('Subscriber ID must be an integer from 0 to 2147483647.');
+ return value}
+$('query').onclick=()=>task(async()=>{const kind=$('kind').value,
+ low=key('low'),high=kind==='range'?key('high'):low;
+ if(kind==='range'&&Number(low)>Number(high))
+ throw Error('Range start must not exceed range end.');
+ const r=await api('query',{kind,low,high:kind==='range'?high:null});
+ $('query-result').innerHTML=table(r,[...metricCols,['matches','Matches']]);
+ $('records').innerHTML=table(r[0].records,[['subscriber_id','ID'],
+ ['cell_id','Cell'],
+ ['subscriber_ref','Reference'],['call_start','Call start'],['duration_s',
+ 'Seconds'],
+ ['technology','Network'],['signal_dbm','dBm']]);
+ notice(r[0].matches+' matches. All three indexes queried.')});
+['insert','delete'].forEach(action=>$(action).onclick=()=>task(async()=>{
+ const r=await api('mutate',{action,key:key('change-key')});
+ $('mutation').innerHTML=table(r.metrics,metricCols);await refresh();
+ notice(action+' completed for ID '+r.key+'.')}));
+$('export').onclick=()=>task(async()=>{
+ const r=await api('export',{});
+ downloadFile('subscriber-directory-export.zip',Uint8Array.from(atob(r.zip),c=>c.charCodeAt(0)),'application/zip');
+ notice('Export downloaded. It contains your CSV and index snapshot.');
+});
+let lastBenchmark=null;
+$('download-benchmark').onclick=()=>{if(lastBenchmark)downloadFile('browser-benchmark.json',JSON.stringify(lastBenchmark,null,2));};
+function showBench(result){lastBenchmark=result;$('download-benchmark').classList.remove('hidden');const rows=result.summary;
+ $('benchmark-result').innerHTML=table(rows,
+ [['n','Records'],['kind','Query'],['method','Method'],['mean_us','Mean µs'],
+ ['stdev_us','SD µs'],['comparisons','Comparisons/query']]);
+ for(const kind of ['exact','range']){const
+ selected=rows.filter(r=>r.n===50000&&r.kind===kind);
+ const max=Math.max(...selected.map(r=>Math.log10(1+r.mean_us)),1);
+ $(kind+'-bars').innerHTML=selected.map(r=>'<div class="barrow"><span>'+
+ esc(r.method)+
+ '</span><div class="bar" style="width:'+Math.max(2,
+ 100*Math.log10(1+r.mean_us)/max)+
+ '%"></div><b>'+r.mean_us.toFixed(2)+' µs</b></div>').join('')+
+ '<p class="hint">Bar length uses log10(1 + microseconds).</p>'}}
+$('benchmark').onclick=()=>task(async()=>{
+ notice('Benchmark running. Please wait for all repetitions.');
+ showBench(await api('benchmark',{}));
+ notice(("Benchmark complete. Every query matched the " +
+"independent validation oracle."))});
+task(async()=>{notice('Loading the Python engine. The first visit needs internet and may take a moment.');await api('status');await refresh();notice('Ready. Generate data or import a CSV to begin.');});
+</script></html>
