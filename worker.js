@@ -7,11 +7,11 @@ const ready = (async () => {
   py.FS.mkdirTree('/project/results');
   const names = ['metrics','data_io','skip_list','hash_table','sorted_array','controller','benchmark','tests'];
   await Promise.all(names.map(async name => {
-    const response = await fetch('./source/'+name+'.py');
+    const response = await fetch('./source/'+name+'.py?v=20261006-4');
     if (!response.ok) throw Error('Could not load '+name);
     py.FS.writeFile('/project/source/'+name+'.py',await response.text());
   }));
-  const bridge = await fetch('./bridge.py');
+  const bridge = await fetch('./bridge.py?v=20261006-4');
   if (!bridge.ok) throw Error('Could not load browser adapter');
   await py.runPythonAsync(await bridge.text());
   return py;

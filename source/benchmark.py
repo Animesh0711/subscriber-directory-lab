@@ -7,7 +7,7 @@ import random
 import statistics
 from datetime import datetime, timezone
 from pathlib import Path
-from controller import Directory
+from controller import Directory, release_indexes
 from data_io import generate, write_csv
 from metrics import Counter, measured
 from sorted_array import merge_sort
@@ -50,13 +50,19 @@ def run_benchmark(sizes=(1000, 10000, 50000), repeats=5, progress=None):
         if progress:
             progress('%s records: building indexes' % n)
         records = generate(n)
+        if progress:
+            progress('%s records: constructing search structures' % n)
         app = Directory()
         app.build(records)
+        if progress:
+            progress('%s records: preparing benchmark data' % n)
         write_csv(ROOT / 'data' / ('subscribers_%d.csv' % n), records)
         exact, ranges = workload(n)
         (ROOT / 'data' / ('queries_%d.json' % n)).write_text(
             json.dumps({'exact': exact, 'range': ranges}, indent=2))
         status = app.status()
+        if progress:
+            progress('%s records: starting queries' % n)
         inspections.append(dict(n=n, skip=status['skip'],
                                 hash=status['hash'], array=status['array']))
         for row in app.build_metrics:
@@ -110,6 +116,12 @@ def run_benchmark(sizes=(1000, 10000, 50000), repeats=5, progress=None):
                     visits=metric['visits'] / len(queries),
                     writes=metric['writes'] / len(queries),
                     queries=len(queries), repeats=repeats))
+        # Release linked nodes iteratively. Deep cascading destruction of
+        # linked Python objects can exhaust the WebAssembly runtime stack.
+        # This is outside every measured region; saved results are values.
+        if progress:
+            progress('%s records: releasing benchmark indexes' % n)
+        release_indexes(app.engines)
     metadata = {'python': platform.python_version(),
                 'os': platform.platform(),
                 'processor': os.environ.get('PROCESSOR_IDENTIFIER', ''),

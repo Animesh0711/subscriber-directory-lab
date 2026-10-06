@@ -15,6 +15,24 @@ def valid_key(value):
     return value
 
 
+def release_indexes(engines):
+    """Release linked nodes iteratively for the WebAssembly runtime."""
+    if not engines:
+        return
+    node = engines[0][1].head
+    while node is not None:
+        following = node.forward[0] if node.forward else None
+        node.forward = []
+        node = following
+    buckets = engines[1][1].buckets
+    for index, node in enumerate(buckets):
+        buckets[index] = None
+        while node is not None:
+            following = node.next
+            node.next = None
+            node = following
+
+
 class Directory:
     def __init__(self):
         self.records, self.engines, self.build_metrics = [], [], []
@@ -30,9 +48,11 @@ class Directory:
         _, hm = measured(lambda c: fill(hashed, c))
         array, am = measured(lambda c: SortedArray(records, c))
         # Commit only after all three builds succeed.
+        previous = self.engines
         self.records = list(records)
         self.engines = [('Skip list', skip), ('Hash table', hashed),
                         ('Binary array', array)]
+        release_indexes(previous)
         self.build_metrics = [dict(method=n, **m) for n, m in
                               zip(['Skip list', 'Hash table',
                                    'Binary array'], [sm, hm, am])]
