@@ -25,7 +25,10 @@ def dispatch(request_json):
     elif path == 'mutate':
         result = directory.mutate(**data)
     elif path == 'benchmark':
-        result = run_benchmark()
+        from js import postMessage, JSON
+        def progress(message):
+            postMessage(JSON.parse(json.dumps({'progress': message})))
+        result = run_benchmark(progress=progress)
         result['metadata']['edition'] = 'Pyodide browser; visitor device'
     elif path == 'export':
         if not directory.engines:

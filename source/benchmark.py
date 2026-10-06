@@ -40,13 +40,15 @@ def workload(n, seed=80):
     return exact, ranges
 
 
-def run_benchmark(sizes=(1000, 10000, 50000), repeats=5):
+def run_benchmark(sizes=(1000, 10000, 50000), repeats=5, progress=None):
     if repeats < 2:
         raise ValueError('Use at least two repetitions.')
     output, raw, builds, inspections = [], [], [], []
     folder = ROOT / 'results'
     folder.mkdir(exist_ok=True)
     for n in sizes:
+        if progress:
+            progress('%s records: building indexes' % n)
         records = generate(n)
         app = Directory()
         app.build(records)
@@ -68,6 +70,8 @@ def run_benchmark(sizes=(1000, 10000, 50000), repeats=5):
             # Correctness oracle is outside all timed regions.
             oracle = {r.subscriber_id: r for r in records}
             for name, engine in active:
+                if progress:
+                    progress('%s records: %s / %s' % (n, kind, name))
                 def batch(c):
                     answers = []
                     for q in queries:

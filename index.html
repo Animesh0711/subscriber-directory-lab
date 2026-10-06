@@ -150,6 +150,7 @@ const worker = new Worker('./worker.js');
 let sequence=0;
 const pending=new Map();
 worker.onmessage=({data})=>{
+ if(data.progress){notice('Benchmark: '+data.progress+'. Please keep this tab open.');return;}
  const call=pending.get(data.id);if(!call)return;
  pending.delete(data.id);data.error?call.reject(Error(data.error)):call.resolve(data.result);
 };

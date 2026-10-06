@@ -33,4 +33,3 @@ self.onmessage=({data: request})=>{
     }
   });
 };
-
