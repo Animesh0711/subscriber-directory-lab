@@ -27,7 +27,10 @@ self.onmessage=({data: request})=>{
       const result=JSON.parse(await py.runPythonAsync('dispatch(request_json)'));
       self.postMessage({id:request.id,result});
     } catch(error) {
-      self.postMessage({id:request.id,error:String(error.message || error)});
+      const message=String(error.message || error);
+      const validation=message.match(/(?:ValueError|TypeError|KeyError): ([^\n]+)/);
+      self.postMessage({id:request.id,error:validation?validation[1]:message});
     }
   });
 };
+
